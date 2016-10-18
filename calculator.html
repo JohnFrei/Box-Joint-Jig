@@ -1,0 +1,186 @@
+<html>
+<style type=text/css>
+h1 {margin-bottom: 5px; margin-top: 1px;}
+</style>
+<head>
+<title>Screw advance spacing table calculator</title>
+<style type=text/css>
+body { font-family: helvetica; font-size: 100%; }
+h1 { font-size: 150%;}
+table.r { font-family: helvetica; font-size: 100%; text-align:right }
+th   { font-family: helvetica; font-size: 100%; text-align:left; font-weight: bold; text-align: center;}
+td.l { font-family: helvetica; font-size: 100%; text-align:left; }
+table.r { font-family: helvetica; font-size: 100%; text-align:center; }
+input.s { width:200; }
+input { width:60; }
+</style>
+</head>
+
+<table><td width=1050>
+<h1>Screw advance spacing table calculator</h1>
+<p>
+
+<form name=parameters>
+
+<table cellpadding=0 cellspacing=0 border=0><tr><td width=250 valign=top>
+<p><b>Primary gear set:</b><br>
+<input class="s" type="string" value="24,35,48" id="primary_gears" name="primary_gears"> </input><p>
+<p><b>Secondary gears:</b><br>
+<input  type="string" value="12,16" id="secondary_gears" name="secondary_gears" > </input><p>
+<td width=250 valign=top>
+<p><b>Thread size:</b><br>
+<input type="number" value="16" id="shaft_tpi" name="shaft_tpi" onchange="tpi_entered()" > </input><b>TPI</b>
+&nbsp;&nbsp;
+<input type="number" value="16" id="shaft_mpt" name="shaft_mpt" onchange="mpt_entered()"> </input><b>mm/turn</b>
+<p><b>Maximum number of turns:</b><br>
+<input type="number" value="5" id="max_turns" name="max_turns"> </input>
+</table>
+<input type="button" style="width:150; font-size:110%" value="Update table" onClick="MakeTable();">
+</form>
+<span id="covepos">
+<p style ="color: red;">
+<b>
+Javascript not enabled!
+<br><br>
+If you are using Internet Explorer, click on the light yellow bar that shows up at the top of the page
+<br>and select "Allow blocked content" to allow the JavaScript table generator program in this page to run.
+</b>
+</span>
+<p>
+
+<script type="text/javascript">
+
+
+function tpi_entered()
+{
+    var p=document.parameters;
+    var shaft_tpi = parseFloat(p.shaft_tpi.value);
+    if (shaft_tpi > 1){
+        p.shaft_mpt.value = (25.4/shaft_tpi).toFixed(3);
+    }
+}
+function mpt_entered()
+{
+    var p=document.parameters;
+    var shaft_mpt = parseFloat(p.shaft_mpt.value);
+    if (shaft_mpt > 1){
+        p.shaft_tpi.value = (25.4/shaft_mpt).toFixed(2);
+    }
+}
+tpi_entered();
+
+function parse_csn(numstring)
+{
+    var res = [];
+    var elements = numstring.split(",");
+    for (var a=0;a<elements.length;a++){
+        //alert("chomped: '"+elements[a].replace(/^\s*|\s*$/g,'')+"'");
+        var num = parseInt(elements[a].replace(/^\s*|\s*$/g,''));
+        if (num > 0 && num < 100){
+            //alert(num);
+            res.push(num);
+        }
+    }
+    //alert("len = "+res);
+    return res;
+}
+
+function MakeTable()
+{
+    var p=document.parameters;    
+    var shaft_tpi = parseFloat(p.shaft_tpi.value);
+
+    if (!(shaft_tpi >= 1 && shaft_tpi <=  50)){
+        shaft_tpi = 16;
+        p.shaft_tpi.value = shaft_tpi;
+    }
+
+    var max_turns  = parseInt(p.max_turns.value);
+    if (!(max_turns >= 1 && max_turns <=  50)){
+        max_turns = 5;
+    }
+    p.max_turns.value = max_turns;
+    
+    var pri_gears = parse_csn(p.primary_gears.value);
+    if (pri_gears.length <= 0){
+        alert("no primary gears");
+    }
+
+    var sec_gears = parse_csn(p.secondary_gears.value);
+    if (sec_gears.len <= 0){
+        alert("no primary gears");
+    }
+
+    var Combos = [];
+
+    for (var p=0;p<pri_gears.length;p++){
+        var pri_t = pri_gears[p];
+        for (var s=0;s<sec_gears.length;s++){
+            var sec_t = sec_gears[s];
+            for (var n=1;n<=max_turns;n++){
+                var Combo = new Object;
+                Combo.turns = 1;
+                Combo.dist = pri_t*n/sec_t/shaft_tpi;
+                Combo.pri_t = pri_t;
+                Combo.sec_t = sec_t;
+                Combo.turns = n;
+                Combos.push(Combo);
+            }
+        }
+    }
+
+    //alert("num combos = "+Combos.length);
+    function elcomp(a,b)
+    {
+        if (a.dist != b.dist) return a.dist-b.dist;
+        if (a.turns != b.turns) return a.turns-b.turns;
+        return b.pri_t-a.pri_t;
+    }
+
+    Combos.sort(elcomp)
+
+
+    document.getElementById("covepos").innerHTML = "Recalculating";
+    var covetab = "";
+
+    covetab += "<table class=r border=1 cellspacing=0>";
+    covetab += "<tr>"
+    covetab += "<th width=90>Advance<br>(mm)<th width=90>Advance<br>(inches)";
+    covetab += "<th width=90><b>Primary<br>gear<th width=90><b>Secondary<br>gear<th width=90><b>Turns";
+
+    var prevdist = 0;
+    for (var a=0;a<Combos.length;a++){
+        var Combo = Combos[a];
+        if (Combo.dist == prevdist) continue;
+        covetab += "<tr><td>"+(Combo.dist*25.4).toFixed(2);
+        covetab += "<td align=left>&nbsp;"+Combo.dist.toFixed(4);    
+        var frac64 = Math.round(Combo.dist*64);
+        var den64 = 64;
+        if (frac64/64 == Combo.dist){
+            while((frac64 & 1) == 0){
+                frac64 = frac64/2;
+                den64 = den64/2;
+            }
+            covetab += "&nbsp;&nbsp;("+Math.round(frac64)+"/"+den64+")&nbsp;";
+        }
+        covetab += "<td>"+Combos[a].pri_t+"<td>"+Combos[a].sec_t+"<td>"+Combo.turns;
+        prevdist = Combo.dist;
+    }
+
+    covetab += "</table>";
+    document.getElementById("covepos").innerHTML = covetab;
+
+
+    return;
+
+
+}
+
+MakeTable();
+
+</script>
+
+</table>
+
+<!-- weblog -->
+<img src="http://74.208.11.218/wg/cove/calculate.gif" height=1 width=1>

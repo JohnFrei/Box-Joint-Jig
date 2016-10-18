@@ -1,0 +1,68 @@
+# Gear template generator 2.05
+# Licensed to: Matthias Wandel
+#              
+
+# Gear type perameters:
+  ContactAngle_deg=7
+  ToothSpacing=1.680
+  ToothPinwheel=False
+  ToothInvolute=True
+  ToothProtractor=False
+  PinSize=1
+
+# Gear1:
+  ShowGear1=True
+  ToothCount1=12
+  ShowSpokes1=False
+  SpokeCount1=5
+  Spur1=True
+  Rack1=False
+  Ring1=False
+  ShaftHoleDia1=0.8
+  Addendum1=0.27
+
+# Gear2:
+  ShowGear2=False
+  ToothCount2=7
+  ShowSpokes2=False
+  SpokeCount2=5
+  Spur2=True
+  Rack2=False
+  Ring2=False
+  ShaftHoleDia2=1
+  Addendum2=0.25
+
+# Chain mode parameters:
+  BlockLength=1.2
+  BlockWidth=0.8
+  BlockChamfer=0.2
+  LinkLength=2
+  LinkWidth=1
+  LinkChamfer=0.2
+  ShowChainLinks=True
+  ShowChainBlocks=True
+  ShowSprocket=True
+  RoundChamfers=False
+  RollerChain=False
+  SprocketTeeth=5
+  ChainPinSize=0.1
+
+# Display options:
+  ScreenViewWidth=19
+  Rotation=92
+  ShowPitchDia=False
+  ShowCenter=True
+  ShowLineOfContact=False
+  ShowAnimated=False
+
+# Grid:
+  ShowGrid=True
+  GridSpacing=1
+  GridDiagonals=False
+
+# Print options:
+  PrintScale=100
+  PrintOverlap=0
+  PrintParameters=False
+
+  ActiveTab=Shaft
